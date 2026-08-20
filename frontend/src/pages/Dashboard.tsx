@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import '../styles.css';
-import { Key, MessageSquare, BarChart, Building, Search, Settings, Sparkles, RefreshCw, Zap, Eraser, ShieldAlert, CheckCircle, AlertTriangle, Play, Square, Send, Copy, X, Lock, Eye, Check, BookOpen } from 'lucide-react';
+import { Key, MessageSquare, BarChart, Building, Search, Settings, Sparkles, RefreshCw, Zap, Eraser, ShieldAlert, CheckCircle, AlertTriangle, Play, Square, Send, Copy, X, Lock, Eye, Check, BookOpen, Activity, Terminal, Shield, Database, Cloud } from 'lucide-react';
 
 import { Overview, SessionItem, IncidentItem, IncidentDetail, AdminTeam, AdminAgent, AdminKey, WebhookItem, WebhookDelivery, ChatMessage, RequestDetail, TabId } from '../lib/types';
 import { money, displayPercent, budgetState as state } from '../lib/utils';
@@ -163,6 +163,9 @@ function App() {
     latencyMs: number;
     requestId: string;
   } | null>(null);
+
+  // Simulation Modal State
+  const [showSimulation, setShowSimulation] = useState<{ active: boolean; type: string; step: number; result: any; message: string }>({ active: false, type: '', step: 0, result: null, message: '' });
 
   // Raw Key Issued Modal State
   const [issuedKey, setIssuedKey] = useState<{ raw_key: string; agent: string; prefix: string } | null>(null);
@@ -709,10 +712,22 @@ function App() {
 
   const runScenario = async (scenario: 'reroute' | 'block' | 'warning' | 'runaway') => {
     setRunning(scenario);
-    setNotice(`RUNNING ${scenario.toUpperCase()} POLICY / REAL GATEWAY`);
+    setShowSimulation({ active: true, type: scenario, step: 0, result: null, message: 'Intercepting Request...' });
+    
+    // Simulate initial delay for animation
+    await new Promise(r => setTimeout(r, 600));
+    setShowSimulation(s => ({ ...s, step: 1, message: 'Acquiring Redis Distributed Lock & Evaluating Budget...' }));
+
     try {
       const response = await fetch(`/api/demo/scenarios/${scenario}`, { method: 'POST', headers: getAuthHeaders() });
       const result = await response.json();
+      
+      await new Promise(r => setTimeout(r, 800));
+      setShowSimulation(s => ({ ...s, step: 2, message: 'Applying Governance Policy...' }));
+      
+      await new Promise(r => setTimeout(r, 800));
+      setShowSimulation(s => ({ ...s, step: 3, result: result, message: response.ok ? `DECISION: ${result.decision}` : `BLOCKED: ${result.detail?.code}` }));
+
       setNotice(
         response.ok
           ? `${result.decision} / ${result.model}`
@@ -2472,6 +2487,105 @@ function App() {
           </div>
         </div>
       )}
+      {/* Visual Simulation Modal */}
+      <AnimatePresence>
+        {showSimulation.active && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              style={{ width: '800px', background: '#09090b', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '24px', padding: '40px', position: 'relative', boxShadow: '0 0 40px rgba(139, 92, 246, 0.15)' }}
+            >
+              <button style={{ position: 'absolute', top: '24px', right: '24px', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }} onClick={() => setShowSimulation({ ...showSimulation, active: false })}><X size={24} /></button>
+              
+              <h2 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Activity size={24} color="var(--purple)" /> 
+                Policy Enforcement Simulation: {showSimulation.type.toUpperCase()}
+              </h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '40px' }}>{showSimulation.message}</p>
+
+              {/* Workflow Diagram */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '40px 0', position: 'relative' }}>
+                
+                {/* Node 1: Client */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', zIndex: 2 }}>
+                   <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: showSimulation.step >= 0 ? 'var(--blue)' : '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: showSimulation.step === 0 ? '0 0 20px var(--blue)' : 'none', transition: 'all 0.3s' }}>
+                      <Terminal size={24} color="#fff" />
+                   </div>
+                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>SDK Client</span>
+                </div>
+
+                {/* Line 1 */}
+                <div style={{ height: '4px', flex: 1, background: showSimulation.step >= 1 ? 'var(--blue)' : '#222', margin: '0 -20px', zIndex: 1, position: 'relative', overflow: 'hidden' }}>
+                   {showSimulation.step === 0 && <motion.div initial={{ x: '-100%' }} animate={{ x: '200%' }} transition={{ repeat: Infinity, duration: 1 }} style={{ width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }} />}
+                </div>
+
+                {/* Node 2: Gateway */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', zIndex: 2 }}>
+                   <div style={{ width: '80px', height: '80px', borderRadius: '16px', background: showSimulation.step >= 1 ? 'var(--purple)' : '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: showSimulation.step === 1 ? '0 0 30px var(--purple)' : 'none', transition: 'all 0.3s' }}>
+                      <Shield size={32} color="#fff" />
+                   </div>
+                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>0xNexigent</span>
+                </div>
+
+                {/* Line 2 (To Budget) */}
+                <div style={{ height: '4px', flex: 1, background: showSimulation.step >= 2 ? 'var(--purple)' : '#222', margin: '0 -20px', zIndex: 1, position: 'relative', overflow: 'hidden' }}>
+                   {showSimulation.step === 1 && <motion.div initial={{ x: '-100%' }} animate={{ x: '200%' }} transition={{ repeat: Infinity, duration: 1 }} style={{ width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }} />}
+                </div>
+
+                {/* Node 3: Budget Engine */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', zIndex: 2 }}>
+                   <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: showSimulation.step >= 2 ? (showSimulation.type === 'block' || showSimulation.type === 'runaway' ? 'var(--red)' : 'var(--amber)') : '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: showSimulation.step === 2 ? `0 0 20px ${showSimulation.type === 'block' || showSimulation.type === 'runaway' ? 'var(--red)' : 'var(--amber)'}` : 'none', transition: 'all 0.3s' }}>
+                      <Database size={24} color="#fff" />
+                   </div>
+                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>Budget Engine</span>
+                </div>
+
+                {/* Line 3 (To Upstream) */}
+                <div style={{ height: '4px', flex: 1, background: showSimulation.step >= 3 ? (showSimulation.result?.decision === 'BLOCK' || showSimulation.type === 'block' || showSimulation.type === 'runaway' ? 'var(--red)' : 'var(--green)') : '#222', margin: '0 -20px', zIndex: 1, position: 'relative', overflow: 'hidden' }}>
+                   {showSimulation.step === 2 && <motion.div initial={{ x: '-100%' }} animate={{ x: '200%' }} transition={{ repeat: Infinity, duration: 1 }} style={{ width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }} />}
+                </div>
+
+                {/* Node 4: Upstream Model */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', zIndex: 2 }}>
+                   <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: showSimulation.step >= 3 ? (showSimulation.result?.decision === 'BLOCK' || showSimulation.type === 'block' || showSimulation.type === 'runaway' ? 'var(--red)' : 'var(--green)') : '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: showSimulation.step === 3 ? `0 0 20px ${showSimulation.result?.decision === 'BLOCK' || showSimulation.type === 'block' || showSimulation.type === 'runaway' ? 'var(--red)' : 'var(--green)'}` : 'none', transition: 'all 0.3s' }}>
+                      {showSimulation.step >= 3 && (showSimulation.result?.decision === 'BLOCK' || showSimulation.type === 'block' || showSimulation.type === 'runaway') ? <X size={24} color="#fff" /> : <Cloud size={24} color="#fff" />}
+                   </div>
+                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>{showSimulation.step >= 3 ? (showSimulation.result?.model || 'Upstream') : 'Upstream'}</span>
+                </div>
+
+              </div>
+
+              {/* Results Box */}
+              <AnimatePresence>
+                {showSimulation.step === 3 && (
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '24px', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>ENFORCEMENT OUTCOME:</span>
+                      <span style={{ color: (showSimulation.result?.decision === 'BLOCK' || showSimulation.type === 'block' || showSimulation.type === 'runaway') ? 'var(--red)' : showSimulation.result?.decision === 'REROUTE' ? 'var(--amber)' : 'var(--green)', fontWeight: 700 }}>{showSimulation.result?.decision || 'ERROR'}</span>
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#fff' }}>
+                      {(showSimulation.result?.decision === 'BLOCK' || showSimulation.type === 'block' || showSimulation.type === 'runaway')
+                        ? (showSimulation.result?.detail?.message || 'Request blocked due to policy constraints.')
+                        : `Successfully routed to ${showSimulation.result?.model} within allowed budget bounds.`
+                      }
+                    </div>
+                    <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button style={{ background: 'var(--purple)', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowSimulation({ ...showSimulation, active: false })}>Acknowledge</button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
