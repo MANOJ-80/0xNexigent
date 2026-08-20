@@ -125,7 +125,7 @@ export const DocsTab = () => {
             </ol>
             <CodeBlock 
               language="bash"
-              code={`# Verify your key is active against the proxy\ncurl -X POST "https://gateway.nexigent.io/v1/chat/completions" \\\n  -H "Authorization: Bearer nx_ag_YOUR_AGENT_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "openai/gpt-oss-120b", "messages": [{"role": "user", "content": "Hi"}]}'`}
+              code={`# Verify your key is active against the proxy\ncurl -X POST "https://nexigent-tau.vercel.app/v1/chat/completions" \\\n  -H "Authorization: Bearer nx_ag_YOUR_AGENT_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "openai/gpt-oss-120b", "messages": [{"role": "user", "content": "Hi"}]}'`}
             />
           </section>
 
@@ -139,7 +139,7 @@ export const DocsTab = () => {
             <h3 style={{ fontSize: '18px', color: '#fff', margin: '32px 0 16px 0' }}>Native Python (OpenAI SDK)</h3>
             <CodeBlock 
               language="python"
-              code={`from openai import AsyncOpenAI\n\n# Point directly to the Nexigent Gateway instead of api.openai.com\nclient = AsyncOpenAI(\n    base_url="https://gateway.nexigent.io/v1",\n    api_key="nx_ag_YOUR_AGENT_KEY"\n)\n\n# Standard API call - Nexigent evaluates budget pre-flight\nresponse = await client.chat.completions.create(\n    model="openai/gpt-oss-120b",\n    messages=[{"role": "user", "content": "Analyze these logs."}]\n)`}
+              code={`from openai import AsyncOpenAI\n\n# Point directly to the Nexigent Gateway instead of api.openai.com\nclient = AsyncOpenAI(\n    base_url="https://nexigent-tau.vercel.app/v1",\n    api_key="nx_ag_YOUR_AGENT_KEY"\n)\n\n# Standard API call - Nexigent evaluates budget pre-flight\nresponse = await client.chat.completions.create(\n    model="openai/gpt-oss-120b",\n    messages=[{"role": "user", "content": "Analyze these logs."}]\n)`}
             />
 
             <h3 style={{ fontSize: '18px', color: '#fff', margin: '32px 0 16px 0' }}>LangChain Integration</h3>
@@ -148,7 +148,7 @@ export const DocsTab = () => {
             </p>
             <CodeBlock 
               language="python"
-              code={`from langchain_openai import ChatOpenAI\nfrom langchain_core.messages import HumanMessage\n\nllm = ChatOpenAI(\n    openai_api_base="https://gateway.nexigent.io/v1",\n    openai_api_key="nx_ag_YOUR_AGENT_KEY",\n    model_name="openai/gpt-oss-120b",\n    max_retries=2\n)\n\n# Executes securely through the governance layer\nresponse = llm.invoke([HumanMessage(content="Hello AI")])`}
+              code={`from langchain_openai import ChatOpenAI\nfrom langchain_core.messages import HumanMessage\n\nllm = ChatOpenAI(\n    openai_api_base="https://nexigent-tau.vercel.app/v1",\n    openai_api_key="nx_ag_YOUR_AGENT_KEY",\n    model_name="openai/gpt-oss-120b",\n    max_retries=2\n)\n\n# Executes securely through the governance layer\nresponse = llm.invoke([HumanMessage(content="Hello AI")])`}
             />
           </section>
 
