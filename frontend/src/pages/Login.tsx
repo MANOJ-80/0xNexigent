@@ -7,7 +7,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [role, setRole] = useState<'ADMIN' | 'OPERATOR' | 'VIEWER'>('ADMIN');
   const [email, setEmail] = useState('admin@nexigent.io');
-  const [secret, setSecret] = useState('');
+  const [secret, setSecret] = useState('change-me-before-deploying'); // Hardcoded for public demo access
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
