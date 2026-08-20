@@ -1,3 +1,0 @@
-api.YOUR_DOMAIN.com {
-    reverse_proxy backend:8000
-}

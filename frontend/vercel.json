@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://api.YOUR_DOMAIN.com/api/:path*"
+      "destination": "http://YOUR_EC2_PUBLIC_IP:8000/api/:path*"
     },
     {
       "source": "/v1/:path*",
-      "destination": "https://api.YOUR_DOMAIN.com/v1/:path*"
+      "destination": "http://YOUR_EC2_PUBLIC_IP:8000/v1/:path*"
     },
     {
       "source": "/(.*)",

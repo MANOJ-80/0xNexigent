@@ -1,24 +1,13 @@
 version: '3.8'
 
 services:
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - backend
-
   backend:
     build: 
       context: .
       dockerfile: backend/Dockerfile
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     env_file: .env
     environment:
       - DATABASE_URL=postgresql+asyncpg://nexigent:nexigent@postgres:5432/nexigent
@@ -58,5 +47,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  caddy_data:
-  caddy_config:
