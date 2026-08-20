@@ -20,7 +20,8 @@
 12. [Control-plane API](#control-plane-api)
 13. [Testing](#testing)
 14. [Security and operating notes](#security-and-operating-notes)
-15. [Current scope](#current-scope)
+15. [Deployment](#deployment)
+16. [Current scope](#current-scope)
 
 ---
 
@@ -466,6 +467,18 @@ npm run build
 - Configure `CORS_ORIGINS` explicitly for the dashboard origin in non-local environments.
 - Do not expose PostgreSQL or Redis outside the internal Docker network in production.
 - A populated `.env` is excluded from source control.
+
+## Deployment
+
+The 0xNexigent platform is designed to run its backend services seamlessly on a single Virtual Machine while offloading the frontend React dashboard to a global CDN.
+
+### Vercel (Frontend)
+The React dashboard is optimized for Vercel, which securely hosts the application and handles all HTTPs routing natively. The repository includes a `vercel.json` configuration file that creates an edge proxy. This proxy automatically and securely tunnels all API requests (`/api` and `/v1`) to the AWS backend without triggering browser Mixed-Content policies, even if the backend is accessed via IP address.
+
+### AWS EC2 (Backend)
+The FastAPI backend, Redis instance, and PostgreSQL database are containerized and deployed on an **AWS EC2 t2/t3.micro instance (Free Tier)**. 
+- Due to EC2 Free Tier memory constraints (1GB RAM), a 2GB swap file is configured on the host instance to ensure the `docker-compose.prod.yml` stack runs flawlessly.
+- The EC2 security group is locked down, allowing inbound traffic *only* on port `8000` (for API traffic) and port `22` (for SSH administration).
 
 ## Current scope
 
