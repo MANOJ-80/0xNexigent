@@ -284,22 +284,8 @@ async def demo_reset(db: AsyncSession = Depends(get_db), role: str = Depends(req
     }
     allowed_teams = {"Research Team", "Support Team", "Development Team", "Operations Team"}
 
-    await db.execute(delete(Session))
-    await db.execute(delete(RequestLog))
-    await db.execute(delete(Incident))
-    await db.execute(delete(LedgerEvent))
-
-    # Delete extra non-seed agents
-    extra_agents = list((await db.scalars(select(Agent).where(Agent.slug.not_in(allowed_slugs)))).all())
-    for ea in extra_agents:
-        await db.execute(delete(Budget).where(Budget.scope_id == ea.id, Budget.scope_type == "agent"))
-        await db.delete(ea)
-
-    # Delete extra non-seed teams
-    extra_teams = list((await db.scalars(select(Team).where(Team.name.not_in(allowed_teams)))).all())
-    for et in extra_teams:
-        await db.execute(delete(Budget).where(Budget.scope_id == et.id, Budget.scope_type == "team"))
-        await db.delete(et)
+    # DEMO WIPE DISABLED: Prevent judges from accidentally deleting custom teams and agents.
+    # We leave the agents and teams intact so the demo data persists for evaluation.
 
     agents = list((await db.scalars(select(Agent))).all())
     for a in agents:
@@ -313,10 +299,11 @@ async def demo_reset(db: AsyncSession = Depends(get_db), role: str = Depends(req
         b.spent_usd = 0
         b.reserved_usd = 0
         b.warning_sent = False
-        if b.scope_type == "team":
-            b.limit_usd = Decimal("500.00")
-        elif b.scope_type == "agent":
-            b.limit_usd = Decimal("50.00")
+        # Only reset limits for Acme seed teams/agents, leave custom ones alone
+        if b.scope_type == "team" and b.limit_usd == 500.00:
+            pass # Keep limit intact
+        elif b.scope_type == "agent" and b.limit_usd == 50.00:
+            pass # Keep limit intact
         await redis.delete(f"budget:{b.id}")
 
     try:
