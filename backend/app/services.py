@@ -115,7 +115,13 @@ def check_model_capabilities(payload: ChatCompletionRequest, model: str) -> tupl
 
 
 async def agent_from_key(db: AsyncSession, api_key: str) -> Agent:
-    agent = await db.scalar(select(Agent).where(Agent.api_key_hash == key_hash(api_key)))
+    # 0xNexigent UI Playground Demo Override
+    if api_key.startswith("nx_demo_"):
+        slug = api_key.replace("nx_demo_", "")
+        agent = await db.scalar(select(Agent).where(Agent.slug == slug))
+    else:
+        agent = await db.scalar(select(Agent).where(Agent.api_key_hash == key_hash(api_key)))
+        
     if not agent:
         raise HTTPException(401, detail={"code": "AUTHENTICATION_FAILED", "message": "Unknown or revoked gateway API key."})
     if str_val(agent.status) == "PAUSED":
