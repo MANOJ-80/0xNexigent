@@ -231,7 +231,7 @@ export default function Landing() {
           {/* Right Column (Dark Block) */}
           <div style={{ background: '#18181b', color: '#fff', padding: '60px 80px', position: 'relative' }}>
             <p style={{ fontSize: '18px', lineHeight: 1.6, marginBottom: '24px', color: '#e4e4e7' }}>
-              A high-performance Rust/FastAPI proxy that sits between your application and your LLM providers. Stop runaway infinite loops, prevent unauthorized model usage, and implement <span style={{ color: '#b8b0ff' }}>cryptographically verifiable audit trails</span> for every single API call.
+              A high-performance AI Gateway that sits between your application and your LLM providers. Stop runaway infinite loops, prevent unauthorized model usage, and implement <span style={{ color: '#b8b0ff' }}>cryptographically verifiable audit trails</span> for every single API call.
             </p>
             
             <p style={{ fontSize: '12px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em', marginBottom: '12px' }}>
