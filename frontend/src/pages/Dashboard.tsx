@@ -1112,7 +1112,7 @@ function App() {
               {(() => {
                 const currentSession = sessions.find((s) => s.external_id === playgroundSessionId);
                 const limit = currentSession ? currentSession.budget_limit : 0;
-                const spent = currentSession ? currentSession.budget_spent : 0;
+                const spent = currentSession ? currentSession.spent : 0;
                 const pct = limit > 0 ? (spent / limit) * 100 : 0;
                 
                 return (
