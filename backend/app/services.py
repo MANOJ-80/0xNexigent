@@ -384,12 +384,16 @@ async def execute(db: AsyncSession, redis: Redis, agent: Agent, payload: ChatCom
         session_budget = next((b for b in budgets if b.scope_type == "session"), None)
         session_consumed = Decimal(str(session_budget.spent_usd)) + Decimal(str(session_budget.reserved_usd)) if session_budget else Decimal(0)
         is_session_exhausted = bool(session_budget and session_consumed >= Decimal(str(session_budget.limit_usd)))
+        
+        session_pct = (session_consumed / Decimal(str(session_budget.limit_usd)) * 100) if session_budget and session_budget.limit_usd > 0 else Decimal(0)
+        pct_str = f" (Session limit {float(session_pct):.1f}% consumed)"
+
         if is_session_exhausted:
-            error_code, error_message = "SESSION_BUDGET_EXHAUSTED", "This session's budget has been fully consumed."
+            error_code, error_message = "SESSION_BUDGET_EXHAUSTED", f"This session's budget has been fully consumed.{pct_str}"
         elif rejected_capabilities and len(rejected_capabilities) == len(candidates):
-            error_code, error_message = "CAPABILITY_MISMATCH", "No approved Groq model supports this request's required capabilities."
+            error_code, error_message = "CAPABILITY_MISMATCH", f"No approved upstream model supports this request's required capabilities.{pct_str}"
         else:
-            error_code, error_message = "BUDGET_EXHAUSTED", "No approved Groq model can fit all active budgets."
+            error_code, error_message = "BUDGET_EXHAUSTED", f"No approved upstream model can fit all active budgets.{pct_str}"
         request.reason = error_code
         db.add(request)
         await db.flush()

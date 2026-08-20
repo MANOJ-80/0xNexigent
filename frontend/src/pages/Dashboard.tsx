@@ -1108,6 +1108,79 @@ function App() {
                 </div>
               )}
 
+              {/* Session Budget Controls Card */}
+              {(() => {
+                const currentSession = sessions.find((s) => s.external_id === playgroundSessionId);
+                const limit = currentSession ? currentSession.budget_limit : 0;
+                const spent = currentSession ? currentSession.budget_spent : 0;
+                const pct = limit > 0 ? (spent / limit) * 100 : 0;
+                
+                return (
+                  <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(18, 18, 20, 1) 100%)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', padding: '20px', marginTop: '16px' }}>
+                    <div style={{ marginBottom: '16px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--purple)' }}>SESSION BUDGET STATUS</span>
+                    </div>
+                    
+                    <div style={{ marginBottom: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Consumed Budget</span>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: pct >= 100 ? 'var(--red)' : '#fff' }}>
+                          {pct.toFixed(1)}% finished
+                        </span>
+                      </div>
+                      <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: pct >= 100 ? 'var(--red)' : pct > 80 ? 'var(--amber)' : 'var(--purple)', transition: 'width 0.3s ease' }} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px', fontFamily: 'var(--font-mono)' }}>OVERRIDE SESSION LIMIT ($)</label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input 
+                          type="number" 
+                          step="0.0001" 
+                          placeholder={limit.toString()}
+                          id="playground_limit_input"
+                          style={{ flex: 1, background: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px 12px', color: '#fff', fontSize: '12px', outline: 'none' }} 
+                        />
+                        <button 
+                          style={{ background: 'var(--purple)', border: 'none', color: '#fff', padding: '0 16px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(1.1)'}
+                          onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
+                          onClick={async () => {
+                            const inputEl = document.getElementById('playground_limit_input') as HTMLInputElement;
+                            const val = inputEl.value;
+                            if (!val) return;
+                            try {
+                              const res = await fetch(`/api/sessions/${playgroundSessionId}/budget`, {
+                                method: 'PUT',
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify({ limit_usd: parseFloat(val) })
+                              });
+                              if (res.ok) {
+                                inputEl.value = '';
+                                setNotice(`SESSION ${playgroundSessionId} LIMIT UPDATED TO $${parseFloat(val).toFixed(4)}`);
+                                const t = Date.now();
+                                fetch(`/api/sessions?t=${t}`, { headers: getAuthHeaders() })
+                                  .then((r) => r.json())
+                                  .then(setSessions);
+                              } else {
+                                const err = await res.json().catch(() => ({}));
+                                alert(`Error: ${err.detail?.message || 'Failed to update limit'}`);
+                              }
+                            } catch (e: any) {
+                              alert(e.message);
+                            }
+                          }}
+                        >
+                          APPLY
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
             </div>
           </div>
         </motion.div>
