@@ -60,6 +60,8 @@ export const DocsTab = () => {
     { id: 'getting-started', label: 'Getting Started', icon: <Terminal size={14} /> },
     { id: 'integration', label: 'Integration Guide', icon: <Code size={14} /> },
     { id: 'configuration', label: 'Configuration & API', icon: <Key size={14} /> },
+    { id: 'advanced-features', label: 'Advanced Features', icon: <ShieldAlert size={14} /> },
+    { id: 'architecture', label: 'Architecture', icon: <Server size={14} /> },
     { id: 'examples', label: 'Examples & Use Cases', icon: <Zap size={14} /> },
     { id: 'troubleshooting', label: 'Troubleshooting & FAQ', icon: <LifeBuoy size={14} /> },
   ];
@@ -164,6 +166,33 @@ export const DocsTab = () => {
               language="python"
               code={`response = await client.chat.completions.create(\n    model="openai/gpt-oss-120b",\n    messages=[{"role": "user", "content": "Help me with my account."}],\n    extra_body={"session_id": "customer_support_session_982"}\n)`}
             />
+          </section>
+
+          {/* Advanced Features */}
+          <section id="advanced-features">
+            <h2 style={{ fontSize: '24px', fontWeight: 600, margin: '32px 0 16px 0', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>Advanced Features & Safety</h2>
+            
+            <h3 style={{ fontSize: '18px', color: '#fff', margin: '24px 0 16px 0' }}>Circuit Breakers (Runaway Loop Protection)</h3>
+            <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--text-muted)' }}>
+              If an agent enters an infinite recursive loop (a common issue in AutoGen or LangChain ReAct agents), it can consume an entire month's budget in minutes. 0xNexigent actively tracks velocity. If an agent spends &gt;20% of its budget in a single hour, a <strong>Circuit Breaker</strong> is tripped. The agent is instantly transitioned to a <code>PAUSED</code> state, triggering a high-severity Incident in the Admin Dashboard.
+            </p>
+
+            <h3 style={{ fontSize: '18px', color: '#fff', margin: '24px 0 16px 0' }}>Dynamic Routing (Fallback Mechanics)</h3>
+            <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--text-muted)' }}>
+              Instead of immediately blocking requests when a budget is tight, the gateway will silently rewrite the request to utilize a cheaper model. For example, if a request to <code>openai/gpt-oss-120b</code> ($0.15/1M tokens) exceeds the remaining budget, the gateway will reroute it to <code>openai/gpt-oss-20b</code> ($0.075/1M tokens). If neither fits, it returns a <code>429 BUDGET_EXHAUSTED</code>.
+            </p>
+          </section>
+
+          {/* Architecture */}
+          <section id="architecture">
+            <h2 style={{ fontSize: '24px', fontWeight: 600, margin: '32px 0 16px 0', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>Architecture Overview</h2>
+            <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--text-muted)' }}>
+              0xNexigent relies on a dual-database architecture for maximum performance and reliability:
+            </p>
+            <ul style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--text-muted)', paddingLeft: '24px', marginBottom: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>Redis (Atomic Locking):</strong> Validates and reserves the estimated cost of a request <em>before</em> the upstream provider is invoked. This guarantees budgets are never over-drafted during high concurrency.</li>
+              <li><strong>PostgreSQL (Durable Ledger):</strong> Once the upstream provider returns the actual token usage, the Redis reservation is released and the exact fractional USD cost is durably committed to the PostgreSQL ledger for auditability.</li>
+            </ul>
           </section>
 
           {/* Examples & Use Cases */}
