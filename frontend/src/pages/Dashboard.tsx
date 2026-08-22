@@ -1410,7 +1410,7 @@ function App() {
                     <div key={r.id} onClick={() => openRequestDetail(r.id)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.03)' }}>
                       <div>
                         <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)' }}>{r.requested}</div>
-                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(r.created_at).toLocaleTimeString()}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(r.created_at).toLocaleString()}</div>
                       </div>
                       <span className={`pill ${ r.decision === 'BLOCK' || r.decision === 'PAUSE' ? 'red' : r.decision === 'REROUTE' ? 'amber' : 'green' }`} style={{ fontSize: '9px', padding: '2px 6px' }}>
                         {r.decision}
@@ -1640,7 +1640,7 @@ function App() {
                           {r.selected ? `Routed to: ${r.selected}` : 'Execution blocked pre-flight'}
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: 'var(--text-muted)' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)' }}>{new Date(r.created_at).toLocaleTimeString()}</span>
+                          <span style={{ fontFamily: 'var(--font-mono)' }}>{new Date(r.created_at).toLocaleString()}</span>
                           <span style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{money(r.actual)}</span>
                         </div>
                       </div>
@@ -1670,7 +1670,7 @@ function App() {
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                             <span style={{ color: 'var(--red)', fontSize: '12px', fontWeight: 700 }}>{inc.severity}</span>
-                            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(inc.created_at).toLocaleTimeString()}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(inc.created_at).toLocaleString()}</span>
                           </div>
                           <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>Agent {inc.agent_slug} triggered {inc.kind}</div>
                         </div>
@@ -2123,7 +2123,7 @@ function App() {
               </div>
               {incidentDetail.recent_requests.map((r) => (
                 <div className="row" key={r.id} style={{ gridTemplateColumns: '120px 2fr 100px 100px', cursor: 'default' }}>
-                  <span>{new Date(r.created_at).toLocaleTimeString()}</span>
+                  <span>{new Date(r.created_at).toLocaleString()}</span>
                   <span><code>{r.requested_model} → {r.selected_model || '—'}</code></span>
                   <span className={`pill ${r.decision === 'BLOCK' ? 'red' : r.decision === 'REROUTE' ? 'amber' : 'green'}`}>{r.decision}</span>
                   <span>{money(r.actual_cost)}</span>
@@ -2404,7 +2404,7 @@ function App() {
                 <div className="timeline-item" key={evt.id}>
                   <h4>{evt.event_type}</h4>
                   <p>
-                    {new Date(evt.created_at).toLocaleTimeString()} — {JSON.stringify(evt.metadata)}
+                    {new Date(evt.created_at).toLocaleString()} — {JSON.stringify(evt.metadata)}
                   </p>
                 </div>
               ))}
